@@ -9,63 +9,90 @@
 <body>
     <div class="container">
         <h1>企业估值计算器</h1>
+        
+        <div class="stock-search-section">
+            <label for="stock-name" class="search-label">股票名称/代码</label>
+            <div class="search-wrapper">
+                <input type="text" id="stock-name" placeholder="输入股票名称或代码（如：天齐锂业、002466）">
+                <button type="button" id="search-stock-btn" class="search-btn">搜索</button>
+            </div>
+            <div class="stock-hint">支持所有A股上市公司，输入股票代码（6位数字）即可获取财报数据</div>
+            <div id="data-source-info" class="data-source-info" style="display: none;"></div>
+            <div id="stock-suggestions" class="stock-suggestions"></div>
+            <div id="stock-loading" class="loading" style="display: none;">正在获取财报数据...</div>
+        </div>
+
         <form id="valuation-form">
             <!-- 参数输入将在这里 -->
             <div>
                 <label for="cash">现金 (账面值)</label>
-                <input type="number" id="cash" value="0">
+                <input type="number" id="cash" value="0" step="any">
+                <span class="suggested-value" id="suggested-cash"></span>
             </div>
             <div>
                 <label for="accounts-receivable">应收账款</label>
-                <input type="number" id="accounts-receivable" value="0">
+                <input type="number" id="accounts-receivable" value="0" step="any">
+                <span class="suggested-value" id="suggested-accounts-receivable"></span>
             </div>
             <div>
                 <label for="credit-loss-rate">预期信用损失率 (%)</label>
-                <input type="number" id="credit-loss-rate" value="0">
+                <input type="number" id="credit-loss-rate" value="0" step="any">
+                <span class="suggested-value" id="suggested-credit-loss-rate"></span>
             </div>
             <div>
                 <label for="notes-receivable">减值后的应收票据</label>
-                <input type="number" id="notes-receivable" value="0">
+                <input type="number" id="notes-receivable" value="0" step="any">
+                <span class="suggested-value" id="suggested-notes-receivable"></span>
             </div>
             <div>
                 <label for="inventory">计提损失后的存货价值</label>
-                <input type="number" id="inventory" value="0">
+                <input type="number" id="inventory" value="0" step="any">
+                <span class="suggested-value" id="suggested-inventory"></span>
             </div>
             <div>
                 <label for="trading-financial-assets">交易性金融资产的当前价值</label>
-                <input type="number" id="trading-financial-assets" value="0">
+                <input type="number" id="trading-financial-assets" value="0" step="any">
+                <span class="suggested-value" id="suggested-trading-financial-assets"></span>
             </div>
             <div>
                 <label for="other-current-assets">其他流动资产 (账面值)</label>
-                <input type="number" id="other-current-assets" value="0">
+                <input type="number" id="other-current-assets" value="0" step="any">
+                <span class="suggested-value" id="suggested-other-current-assets"></span>
             </div>
             <div>
                 <label for="non-current-assets-due-within-one-year">一年内到期的非流动资产 (账面值)</label>
-                <input type="number" id="non-current-assets-due-within-one-year" value="0">
+                <input type="number" id="non-current-assets-due-within-one-year" value="0" step="any">
+                <span class="suggested-value" id="suggested-non-current-assets-due-within-one-year"></span>
             </div>
             <div>
                 <label for="plant-depreciation-coefficient">厂房/折旧系数</label>
-                <input type="number" id="plant-depreciation-coefficient" value="0">
+                <input type="number" id="plant-depreciation-coefficient" value="0" step="any">
+                <span class="suggested-value" id="suggested-plant-depreciation-coefficient"></span>
             </div>
             <div>
                 <label for="machinery-depreciation-coefficient">生产机器设备/折旧系数</label>
-                <input type="number" id="machinery-depreciation-coefficient" value="0">
+                <input type="number" id="machinery-depreciation-coefficient" value="0" step="any">
+                <span class="suggested-value" id="suggested-machinery-depreciation-coefficient"></span>
             </div>
             <div>
                 <label for="construction-in-progress">在建工程账面价值</label>
-                <input type="number" id="construction-in-progress" value="0">
+                <input type="number" id="construction-in-progress" value="0" step="any">
+                <span class="suggested-value" id="suggested-construction-in-progress"></span>
             </div>
             <div>
                 <label for="land-book-value">土地账面价值</label>
-                <input type="number" id="land-book-value" value="0">
+                <input type="number" id="land-book-value" value="0" step="any">
+                <span class="suggested-value" id="suggested-land-book-value"></span>
             </div>
             <div>
                 <label for="land-value-coefficient">还原到当下土地价值系数</label>
-                <input type="number" id="land-value-coefficient" value="0">
+                <input type="number" id="land-value-coefficient" value="0" step="any">
+                <span class="suggested-value" id="suggested-land-value-coefficient"></span>
             </div>
             <div>
                 <label for="goodwill">商誉 (账面值)</label>
-                <input type="number" id="goodwill" value="0">
+                <input type="number" id="goodwill" value="0" step="any">
+                <span class="suggested-value" id="suggested-goodwill"></span>
             </div>
             <div>
                 <label for="company-type">企业类型</label>
@@ -74,45 +101,59 @@
                     <option value="consumer">消费股</option>
                     <option value="real-estate">地产股</option>
                 </select>
+                <span class="suggested-value" id="suggested-company-type"></span>
             </div>
             <div id="cyclical-resource-fields">
                 <div>
                     <label for="patent-technology-value-cyclical">专利技术价值</label>
-                    <input type="number" id="patent-technology-value-cyclical" value="0">
+                    <input type="number" id="patent-technology-value-cyclical" value="0" step="any">
+                    <span class="suggested-value" id="suggested-patent-technology-value-cyclical"></span>
                 </div>
                 <div>
                     <label for="mineral-rights-value">矿产权益价值</label>
-                    <input type="number" id="mineral-rights-value" value="0">
+                    <input type="number" id="mineral-rights-value" value="0" step="any">
+                    <span class="suggested-value" id="suggested-mineral-rights-value"></span>
                 </div>
             </div>
             <div id="consumer-fields" style="display:none;">
                 <div>
                     <label for="patent-technology-value-consumer">专利技术价值</label>
-                    <input type="number" id="patent-technology-value-consumer" value="0">
+                    <input type="number" id="patent-technology-value-consumer" value="0" step="any">
+                    <span class="suggested-value" id="suggested-patent-technology-value-consumer"></span>
                 </div>
                 <div>
                     <label for="product-portfolio-value">产品组合价值</label>
-                    <input type="number" id="product-portfolio-value" value="0">
+                    <input type="number" id="product-portfolio-value" value="0" step="any">
+                    <span class="suggested-value" id="suggested-product-portfolio-value"></span>
                 </div>
                 <div>
                     <label for="trained-staff-value">训练有素的员工价值</label>
-                    <input type="number" id="trained-staff-value" value="0">
+                    <input type="number" id="trained-staff-value" value="0" step="any">
+                    <span class="suggested-value" id="suggested-trained-staff-value"></span>
                 </div>
                 <div>
                     <label for="customer-relationship-value">客户关系价值</label>
-                    <input type="number" id="customer-relationship-value" value="0">
+                    <input type="number" id="customer-relationship-value" value="0" step="any">
+                    <span class="suggested-value" id="suggested-customer-relationship-value"></span>
                 </div>
             </div>
             <div>
                 <label for="debt">债务</label>
-                <input type="number" id="debt" value="0">
+                <input type="number" id="debt" value="0" step="any">
+                <span class="suggested-value" id="suggested-debt"></span>
             </div>
             <button type="submit">计算估值</button>
         </form>
         <div id="result">
             <h2>估值结果</h2>
-            <p>再生产价值: <span id="reproduction-value">0</span></p>
-            <p>合理买入价格: <span id="reasonable-price">0</span></p>
+            <p class="result-label">再生产价值</p>
+            <p class="result-value" id="reproduction-value">0</p>
+            <p class="result-label">合理买入价格</p>
+            <p class="result-value" id="reasonable-price">0</p>
+        </div>
+        <div id="calculation-process">
+            <h2>计算过程</h2>
+            <div id="calculation-steps"></div>
         </div>
     </div>
     <script src="script.js"></script>
