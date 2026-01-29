@@ -256,6 +256,123 @@ document.addEventListener('click', function(e) {
     }
 });
 
+// PDF上传和解析功能
+const pdfFileInput = document.getElementById('pdf-file');
+const uploadPdfBtn = document.getElementById('upload-pdf-btn');
+const pdfLoading = document.getElementById('pdf-loading');
+const pdfError = document.getElementById('pdf-error');
+
+uploadPdfBtn.addEventListener('click', async function() {
+    const file = pdfFileInput.files[0];
+    if (!file) {
+        showPdfError('请先选择一个PDF文件');
+        return;
+    }
+
+    if (file.type !== 'application/pdf' && !file.name.endsWith('.pdf')) {
+        showPdfError('请选择PDF格式的文件');
+        return;
+    }
+
+    pdfLoading.style.display = 'block';
+    pdfError.style.display = 'none';
+
+    try {
+        const pdfText = await extractTextFromPdf(file);
+        const financialData = parseFinancialDataFromText(pdfText);
+        
+        if (financialData) {
+            displaySuggestions(financialData);
+            dataSourceInfo.textContent = '数据来源：上传的PDF文件';
+            dataSourceInfo.style.display = 'block';
+        } else {
+            showPdfError('未能从PDF文件中提取到有效的财务数据');
+        }
+    } catch (error) {
+        console.error('PDF解析失败:', error);
+        showPdfError('PDF解析失败，请确保文件格式正确且包含财务数据');
+    } finally {
+        pdfLoading.style.display = 'none';
+    }
+});
+
+async function extractTextFromPdf(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        
+        reader.onload = async function(e) {
+            try {
+                const typedArray = new Uint8Array(e.target.result);
+                const pdf = await pdfjsLib.getDocument({ data: typedArray }).promise;
+                
+                let textContent = '';
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const content = await page.getTextContent();
+                    const pageText = content.items.map(item => item.str).join('\n');
+                    textContent += pageText + '\n';
+                }
+                
+                resolve(textContent);
+            } catch (error) {
+                reject(error);
+            }
+        };
+        
+        reader.onerror = function() {
+            reject(new Error('文件读取失败'));
+        };
+        
+        reader.readAsArrayBuffer(file);
+    });
+}
+
+function parseFinancialDataFromText(text) {
+    const parseValue = (pattern) => {
+        const match = text.match(pattern);
+        if (match) {
+            let valueStr = match[1].replace(/,/g, '').replace(/\s/g, '');
+            const value = parseFloat(valueStr);
+            return isNaN(value) ? 0 : value / 100000000; // 转换为亿元
+        }
+        return 0;
+    };
+    
+    return {
+        cash: parseValue(/现金[\s\S]*?(\d[\d,\s]*\.?\d*)/i) || 
+               parseValue(/货币资金[\s\S]*?(\d[\d,\s]*\.?\d*)/i),
+        accountsReceivable: parseValue(/应收账款[\s\S]*?(\d[\d,\s]*\.?\d*)/i),
+        creditLossRate: 0,
+        notesReceivable: parseValue(/应收票据[\s\S]*?(\d[\d,\s]*\.?\d*)/i),
+        inventory: parseValue(/存货[\s\S]*?(\d[\d,\s]*\.?\d*)/i),
+        tradingFinancialAssets: parseValue(/交易性金融资产[\s\S]*?(\d[\d,\s]*\.?\d*)/i),
+        otherCurrentAssets: parseValue(/其他流动资产[\s\S]*?(\d[\d,\s]*\.?\d*)/i),
+        nonCurrentAssetsDue: 0,
+        plantDepreciation: 0,
+        machineryDepreciation: 0,
+        constructionInProgress: parseValue(/在建工程[\s\S]*?(\d[\d,\s]*\.?\d*)/i),
+        landBookValue: parseValue(/土地使用权[\s\S]*?(\d[\d,\s]*\.?\d*)/i),
+        landValueCoefficient: 0,
+        goodwill: parseValue(/商誉[\s\S]*?(\d[\d,\s]*\.?\d*)/i),
+        companyType: 'cyclical-resource',
+        patentTechnologyValue: 0,
+        mineralRightsValue: 0,
+        productPortfolioValue: 0,
+        trainedStaffValue: 0,
+        customerRelationshipValue: 0,
+        debt: parseValue(/总负债[\s\S]*?(\d[\d,\s]*\.?\d*)/i) || 
+              parseValue(/负债合计[\s\S]*?(\d[\d,\s]*\.?\d*)/i)
+    };
+}
+
+function showPdfError(message) {
+    pdfError.textContent = message;
+    pdfError.style.display = 'block';
+    setTimeout(() => {
+        pdfError.style.display = 'none';
+    }, 3000);
+}
+
 async function fetchStockData(stockCode) {
     stockLoading.style.display = 'block';
     clearSuggestions();

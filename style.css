@@ -47,7 +47,8 @@ h1 {
     letter-spacing: -0.5px;
 }
 
-.stock-search-section {
+.stock-search-section,
+.pdf-upload-section {
     margin-bottom: 35px;
     padding: 30px;
     background: linear-gradient(145deg, #fff0f0, #ffe0e0);
@@ -59,7 +60,8 @@ h1 {
     position: relative;
 }
 
-.stock-search-section::after {
+.stock-search-section::after,
+.pdf-upload-section::after {
     content: '';
     position: absolute;
     top: 0;
@@ -69,6 +71,73 @@ h1 {
     border-radius: 25px;
     box-shadow: inset 2px 2px 5px rgba(220, 53, 69, 0.1);
     pointer-events: none;
+}
+
+.pdf-upload-section input[type="file"] {
+    flex: 1;
+    margin-bottom: 0;
+    padding: 14px 18px;
+    font-size: 15px;
+    min-width: 0;
+    box-sizing: border-box;
+    background: linear-gradient(145deg, #ffffff, #f5f5f5);
+    border: none;
+    border-radius: 15px;
+    box-shadow: 
+        5px 5px 15px #d0d0d0,
+        -5px -5px 15px #ffffff;
+    transition: all 0.3s ease;
+}
+
+.pdf-upload-section input[type="file"]:hover {
+    box-shadow: 
+        3px 3px 10px #d0d0d0,
+        -3px -3px 10px #ffffff;
+    transform: translateY(-1px);
+}
+
+.pdf-upload-section input[type="file"]::file-selector-button {
+    background: linear-gradient(145deg, #dc3545, #c82333);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 8px 16px;
+    margin-right: 12px;
+    cursor: pointer;
+    font-weight: 500;
+    box-shadow: 
+        3px 3px 8px rgba(220, 53, 69, 0.3),
+        -3px -3px 8px rgba(255, 255, 255, 0.5);
+    transition: all 0.3s ease;
+}
+
+.pdf-upload-section input[type="file"]::file-selector-button:hover {
+    background: linear-gradient(145deg, #c82333, #b02a37);
+    box-shadow: 
+        2px 2px 5px rgba(220, 53, 69, 0.4),
+        -2px -2px 5px rgba(255, 255, 255, 0.6);
+    transform: translateY(-1px);
+}
+
+.error-message {
+    margin-top: 15px;
+    padding: 12px 18px;
+    background: linear-gradient(145deg, #f8d7da, #f5c6cb);
+    border-radius: 15px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #721c24;
+    box-shadow: 
+        4px 4px 10px #d0d0d0,
+        -4px -4px 10px #ffffff;
+    display: flex;
+    align-items: center;
+}
+
+.error-message::before {
+    content: '❌';
+    margin-right: 8px;
+    font-size: 16px;
 }
 
 .search-label {

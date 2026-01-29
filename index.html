@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>企业估值计算器</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -20,6 +21,17 @@
             <div id="data-source-info" class="data-source-info" style="display: none;"></div>
             <div id="stock-suggestions" class="stock-suggestions"></div>
             <div id="stock-loading" class="loading" style="display: none;">正在获取财报数据...</div>
+        </div>
+
+        <div class="pdf-upload-section">
+            <label for="pdf-file" class="search-label">上传财报PDF文件</label>
+            <div class="search-wrapper">
+                <input type="file" id="pdf-file" accept=".pdf">
+                <button type="button" id="upload-pdf-btn" class="search-btn">解析PDF</button>
+            </div>
+            <div class="stock-hint">支持PDF格式的财报文件，系统将自动解析并提取财务数据</div>
+            <div id="pdf-loading" class="loading" style="display: none;">正在解析PDF文件...</div>
+            <div id="pdf-error" class="error-message" style="display: none;"></div>
         </div>
 
         <form id="valuation-form">
