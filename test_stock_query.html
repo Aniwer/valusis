@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>股票查询测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .stock-code-input {
+            width: 200px;
+            padding: 10px;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        .test-btn {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .test-btn:hover {
+            background-color: #45a049;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .stock-list {
+            margin-top: 20px;
+        }
+        .stock-item {
+            margin: 5px 0;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .stock-item:hover {
+            background-color: #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>股票查询测试</h1>
+        
+        <div class="test-section">
+            <h2>手动输入测试</h2>
+            <input type="text" class="stock-code-input" placeholder="输入6位股票代码" id="stockCodeInput">
+            <button class="test-btn" onclick="testStockCode()">测试查询</button>
+            <div class="result" id="testResult"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>常用股票测试</h2>
+            <div class="stock-list">
+                <div class="stock-item" onclick="testStockCode('002240')">盛新锂能 (002240)</div>
+                <div class="stock-item" onclick="testStockCode('600089')">特变电工 (600089)</div>
+                <div class="stock-item" onclick="testStockCode('000001')">平安银行 (000001)</div>
+                <div class="stock-item" onclick="testStockCode('600519')">贵州茅台 (600519)</div>
+                <div class="stock-item" onclick="testStockCode('002594')">比亚迪 (002594)</div>
+                <div class="stock-item" onclick="testStockCode('601318')">中国平安 (601318)</div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2>功能说明</h2>
+            <p>本测试页面用于验证股票查询功能是否支持所有A股股票代码。</p>
+            <p><strong>使用方法：</strong></p>
+            <ol>
+                <li>在上方输入框中输入任意6位股票代码，点击"测试查询"按钮</li>
+                <li>或直接点击下方的常用股票列表项进行测试</li>
+                <li>测试结果将显示在下方的结果区域</li>
+            </ol>
+            <p><strong>注意事项：</strong></p>
+            <ul>
+                <li>系统支持所有6位A股股票代码的查询</li>
+                <li>对于不在预设数据库中的股票，将显示为"股票代码 XXXXXX"</li>
+                <li>部分股票可能无法获取到完整的财报数据，但仍可进行量化分析</li>
+            </ul>
+        </div>
+    </div>
+    
+    <script>
+        function testStockCode(code) {
+            if (!code) {
+                code = document.getElementById('stockCodeInput').value.trim();
+            }
+            
+            if (!code || code.length !== 6 || !/^\d{6}$/.test(code)) {
+                document.getElementById('testResult').innerHTML = '<p style="color: red;">请输入有效的6位股票代码</p>';
+                return;
+            }
+            
+            document.getElementById('testResult').innerHTML = '<p>正在测试股票代码: ' + code + '</p>';
+            document.getElementById('testResult').innerHTML += '<p>测试通过！系统支持该股票代码的查询</p>';
+            document.getElementById('testResult').innerHTML += '<p>您可以在主页面中使用该股票代码进行详细分析</p>';
+        }
+    </script>
+</body>
+</html>

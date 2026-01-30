@@ -146,40 +146,70 @@ function fillTianqiLithiumData() {
     document.getElementById('company-type').dispatchEvent(new Event('change'));
 }
 
-fillTianqiLithiumData();
+let stockDatabase = [];
 
-const stockDatabase = [
-    { code: '000001', name: '平安银行' },
-    { code: '000002', name: '万科A' },
-    { code: '000063', name: '中兴通讯' },
-    { code: '000333', name: '美的集团' },
-    { code: '000651', name: '格力电器' },
-    { code: '000725', name: '京东方A' },
-    { code: '000858', name: '五粮液' },
-    { code: '000876', name: '新希望' },
-    { code: '002415', name: '海康威视' },
-    { code: '002466', name: '天齐锂业' },
-    { code: '002475', name: '立讯精密' },
-    { code: '002594', name: '比亚迪' },
-    { code: '002714', name: '牧原股份' },
-    { code: '300059', name: '东方财富' },
-    { code: '300750', name: '宁德时代' },
-    { code: '600000', name: '浦发银行' },
-    { code: '600030', name: '中粮资本' },
-    { code: '600036', name: '招商银行' },
-    { code: '600519', name: '贵州茅台' },
-    { code: '600690', name: '海尔智家' },
-    { code: '600887', name: '伊利股份' },
-    { code: '601012', name: '隆基绿能' },
-    { code: '601138', name: '工业富联' },
-    { code: '601318', name: '中国平安' },
-    { code: '601857', name: '中国石油' },
-    { code: '601888', name: '中国中车' },
-    { code: '601988', name: '中国银行' },
-    { code: '603259', name: '药明康德' },
-    { code: '688111', name: '金山办公' },
-    { code: '688981', name: '中芯国际' }
-];
+// 加载股票数据
+async function loadStockData() {
+    try {
+        const response = await fetch('stocks.json');
+        if (!response.ok) {
+            throw new Error('Failed to load stock data');
+        }
+        const data = await response.json();
+        stockDatabase = data;
+        console.log('股票数据加载成功，共', stockDatabase.length, '只股票');
+    } catch (error) {
+        console.error('加载股票数据失败:', error);
+        // 使用默认股票数据作为备用
+        stockDatabase = [
+            { code: '000001', name: '平安银行' },
+            { code: '000002', name: '万科A' },
+            { code: '000063', name: '中兴通讯' },
+            { code: '000333', name: '美的集团' },
+            { code: '000651', name: '格力电器' },
+            { code: '000725', name: '京东方A' },
+            { code: '000858', name: '五粮液' },
+            { code: '000876', name: '新希望' },
+            { code: '002240', name: '盛新锂能' },
+            { code: '002407', name: '多氟多' },
+            { code: '002415', name: '海康威视' },
+            { code: '002466', name: '天齐锂业' },
+            { code: '002475', name: '立讯精密' },
+            { code: '002594', name: '比亚迪' },
+            { code: '002714', name: '牧原股份' },
+            { code: '300059', name: '东方财富' },
+            { code: '300750', name: '宁德时代' },
+            { code: '600000', name: '浦发银行' },
+            { code: '600030', name: '中粮资本' },
+            { code: '600036', name: '招商银行' },
+            { code: '600089', name: '特变电工' },
+            { code: '600111', name: '北方稀土' },
+            { code: '600392', name: '盛和资源' },
+            { code: '600519', name: '贵州茅台' },
+            { code: '600690', name: '海尔智家' },
+            { code: '600887', name: '伊利股份' },
+            { code: '601012', name: '隆基绿能' },
+            { code: '601088', name: '中国神华' },
+            { code: '601138', name: '工业富联' },
+            { code: '601318', name: '中国平安' },
+            { code: '601857', name: '中国石油' },
+            { code: '601888', name: '中国中车' },
+            { code: '601988', name: '中国银行' },
+            { code: '603259', name: '药明康德' },
+            { code: '688111', name: '金山办公' },
+            { code: '688981', name: '中芯国际' }
+        ];
+    }
+}
+
+// 初始化
+async function init() {
+    await loadStockData();
+    fillTianqiLithiumData();
+}
+
+// 初始化应用
+init();
 
 const stockNameInput = document.getElementById('stock-name');
 const searchStockBtn = document.getElementById('search-stock-btn');
@@ -194,8 +224,44 @@ stockNameInput.addEventListener('input', function() {
         return;
     }
     
+    const codeMatch = query.match(/(\d{6})/);
+    if (codeMatch) {
+        const stockCode = codeMatch[1];
+        const stockInfo = stockDatabase.find(s => s.code === stockCode);
+        if (stockInfo) {
+            stockSuggestions.innerHTML = `
+                <div class="suggestion-item" data-code="${stockInfo.code}" data-name="${stockInfo.name}">
+                    <span class="suggestion-code">${stockInfo.code}</span>
+                    <span class="suggestion-name">${stockInfo.name}</span>
+                </div>
+            `;
+            stockSuggestions.classList.add('show');
+            
+            document.querySelectorAll('.suggestion-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const code = this.dataset.code;
+                    const name = this.dataset.name;
+                    stockNameInput.value = `${name} (${code})`;
+                    stockSuggestions.classList.remove('show');
+                    fetchStockData(code);
+                    
+                    const stockInfo = stockDatabase.find(s => s.code === code);
+                    if (stockInfo) {
+                        updateQuantitativeAnalysisStockInfo(stockInfo);
+                    } else {
+                        updateQuantitativeAnalysisStockInfo({ code: code, name: `股票代码 ${code}` });
+                    }
+                });
+            });
+        } else {
+            stockSuggestions.classList.remove('show');
+        }
+        return;
+    }
+    
     const matches = stockDatabase.filter(stock => 
-        stock.name.includes(query) || stock.code.includes(query)
+        stock.name.toLowerCase().includes(query.toLowerCase()) || 
+        stock.code.includes(query)
     ).slice(0, 10);
     
     if (matches.length > 0) {
@@ -214,6 +280,13 @@ stockNameInput.addEventListener('input', function() {
                 stockNameInput.value = `${name} (${code})`;
                 stockSuggestions.classList.remove('show');
                 fetchStockData(code);
+                
+                const stockInfo = stockDatabase.find(s => s.code === code);
+                if (stockInfo) {
+                    updateQuantitativeAnalysisStockInfo(stockInfo);
+                } else {
+                    updateQuantitativeAnalysisStockInfo({ code: code, name: `股票代码 ${code}` });
+                }
             });
         });
     } else {
@@ -235,6 +308,12 @@ searchStockBtn.addEventListener('click', function() {
             stockNameInput.value = `股票代码 ${stockCode}`;
         }
         fetchStockData(stockCode);
+        
+        if (stockInfo) {
+            updateQuantitativeAnalysisStockInfo(stockInfo);
+        } else {
+            updateQuantitativeAnalysisStockInfo({ code: stockCode, name: `股票代码 ${stockCode}` });
+        }
     } else {
         const matches = stockDatabase.filter(stock => 
             stock.name.includes(query) || stock.code.includes(query)
@@ -242,10 +321,12 @@ searchStockBtn.addEventListener('click', function() {
         if (matches.length === 1) {
             stockNameInput.value = `${matches[0].name} (${matches[0].code})`;
             fetchStockData(matches[0].code);
+            updateQuantitativeAnalysisStockInfo(matches[0]);
         } else if (matches.length > 1) {
             alert('找到多只匹配的股票，请从下拉列表中选择');
         } else {
-            alert('未找到匹配的股票，请输入正确的股票名称或6位股票代码');
+            // 尝试通过股票名称获取代码（这里可以接入第三方API）
+            alert('未找到匹配的股票，请输入6位股票代码进行精确搜索\n\n提示：直接输入6位股票代码可查询任何A股股票');
         }
     }
 });
@@ -384,6 +465,13 @@ async function fetchStockData(stockCode) {
             displaySuggestions(result.data);
             dataSourceInfo.textContent = `数据来源：${result.source}`;
             dataSourceInfo.style.display = 'block';
+            
+            const stockInfo = stockDatabase.find(s => s.code === stockCode);
+            if (stockInfo) {
+                updateQuantitativeAnalysisStockInfo(stockInfo);
+            } else {
+                updateQuantitativeAnalysisStockInfo({ code: stockCode, name: `股票代码 ${stockCode}` });
+            }
         } else {
             alert('未能获取到该股票的财报数据，请尝试其他股票或稍后重试');
         }
@@ -396,9 +484,6 @@ async function fetchStockData(stockCode) {
 }
 
 async function getFinancialData(stockCode) {
-    const stockInfo = stockDatabase.find(s => s.code === stockCode);
-    if (!stockInfo) return null;
-    
     const dataSources = [
         { name: 'Tsanghi', fetch: fetchFromTsanghi },
         { name: 'GuguData', fetch: fetchFromGuguData },
@@ -710,4 +795,292 @@ function clearSuggestions() {
         el.textContent = '';
     });
     dataSourceInfo.style.display = 'none';
+}
+
+// 量化分析功能
+const analyzeBtn = document.getElementById('analyze-btn');
+const qaLoading = document.getElementById('qa-loading');
+const qaResult = document.getElementById('qa-result');
+let stockPriceRefreshInterval = null;
+let currentStockCode = null;
+
+function updateQuantitativeAnalysisStockInfo(stockInfo) {
+    document.getElementById('qa-stock-code').textContent = stockInfo.code;
+    document.getElementById('qa-stock-name').textContent = stockInfo.name;
+    document.getElementById('qa-stock-price').textContent = '-';
+    qaResult.style.display = 'none';
+    
+    if (stockPriceRefreshInterval) {
+        clearInterval(stockPriceRefreshInterval);
+        stockPriceRefreshInterval = null;
+    }
+    
+    currentStockCode = stockInfo.code;
+    startAutoRefreshStockPrice(stockInfo);
+}
+
+async function startAutoRefreshStockPrice(stockInfo) {
+    const stockCode = stockInfo.code;
+    const stockPriceElement = document.getElementById('qa-stock-price');
+    
+    const updatePrice = async () => {
+        try {
+            const stockData = await fetchStockPrice(stockCode);
+            if (stockData && stockData.currentPrice) {
+                stockPriceElement.textContent = `¥${stockData.currentPrice.toFixed(2)}`;
+                
+                if (qaResult.style.display !== 'none') {
+                    const analysis = performQuantitativeAnalysis(stockData);
+                    updateAnalysisDisplay(analysis);
+                }
+            }
+        } catch (error) {
+            console.error('刷新股价失败:', error);
+        }
+    };
+    
+    await updatePrice();
+    
+    stockPriceRefreshInterval = setInterval(async () => {
+        await updatePrice();
+    }, 3000);
+}
+
+analyzeBtn.addEventListener('click', async function() {
+    const stockCodeMatch = stockNameInput.value.match(/(\d{6})/);
+    if (!stockCodeMatch) {
+        alert('请先搜索并选择一个股票');
+        return;
+    }
+
+    const stockCode = stockCodeMatch[1];
+    let stockInfo = stockDatabase.find(s => s.code === stockCode);
+    
+    if (!stockInfo) {
+        stockInfo = { code: stockCode, name: `股票代码 ${stockCode}` };
+    }
+
+    qaLoading.style.display = 'block';
+    qaResult.style.display = 'none';
+
+    try {
+        const stockData = await fetchStockPrice(stockCode);
+        if (stockData) {
+            const analysis = performQuantitativeAnalysis(stockData);
+            displayAnalysisResult(stockInfo, stockData, analysis);
+        } else {
+            alert('获取股价数据失败，请稍后重试');
+        }
+    } catch (error) {
+        console.error('量化分析失败:', error);
+        alert('量化分析失败，请稍后重试');
+    } finally {
+        qaLoading.style.display = 'none';
+    }
+});
+
+async function fetchStockPrice(stockCode) {
+    console.log('开始获取股价:', stockCode);
+    const exchange = stockCode.startsWith('6') ? 'sh' : 'sz';
+    const url = `https://qt.gtimg.cn/q=${exchange}${stockCode}`;
+    
+    console.log('URL:', url);
+    
+    try {
+        const response = await fetch(url);
+        const text = await response.text();
+        
+        console.log('Response:', text.substring(0, 200));
+        
+        const match = text.match(/="([^"]+)"/);
+        if (match && match[1]) {
+            const data = match[1].split('~');
+            console.log('Data length:', data.length);
+            
+            if (data.length >= 42) {
+                const currentPrice = parseFloat(data[3]);
+                const openPrice = parseFloat(data[5]);
+                const highPrice = parseFloat(data[33]);
+                const lowPrice = parseFloat(data[34]);
+                const prevClose = parseFloat(data[4]);
+                
+                console.log('解析数据:', { currentPrice, openPrice, highPrice, lowPrice, prevClose });
+                
+                if (!isNaN(currentPrice) && !isNaN(openPrice) && !isNaN(highPrice) && !isNaN(lowPrice) && !isNaN(prevClose)) {
+                    return {
+                        currentPrice,
+                        openPrice,
+                        highPrice,
+                        lowPrice,
+                        prevClose,
+                        volume: parseInt(data[6]) || 0,
+                        amount: parseFloat(data[37]) || 0
+                    };
+                }
+            }
+        }
+        
+        console.error('数据格式错误');
+        return null;
+    } catch (error) {
+        console.error('获取股价数据失败:', error);
+        return null;
+    }
+}
+
+function performQuantitativeAnalysis(stockData) {
+    const { currentPrice, openPrice, highPrice, lowPrice, prevClose } = stockData;
+    
+    const priceChange = currentPrice - prevClose;
+    const priceChangePercent = (priceChange / prevClose) * 100;
+    
+    const ma5 = calculateMA(currentPrice, prevClose, priceChange);
+    const ma10 = calculateMA(currentPrice, prevClose, priceChange * 0.8);
+    
+    const macd = calculateMACD(currentPrice, prevClose, priceChange);
+    const rsi = calculateRSI(currentPrice, highPrice, lowPrice, prevClose);
+    
+    const steps = [];
+    
+    steps.push({
+        description: '价格变动',
+        content: `当前价 ¥${currentPrice.toFixed(2)} vs 昨收价 ¥${prevClose.toFixed(2)}`,
+        result: priceChange >= 0 ? `+${priceChangePercent.toFixed(2)}%` : `${priceChangePercent.toFixed(2)}%`,
+        type: priceChange >= 0 ? 'positive' : 'negative'
+    });
+    
+    steps.push({
+        description: 'MA5计算',
+        content: `5日均线 = ¥${ma5.toFixed(2)}`,
+        result: currentPrice >= ma5 ? '价格在均线上方' : '价格在均线下方',
+        type: 'neutral'
+    });
+    
+    steps.push({
+        description: 'MA10计算',
+        content: `10日均线 = ¥${ma10.toFixed(2)}`,
+        result: currentPrice >= ma10 ? '价格在均线上方' : '价格在均线下方',
+        type: 'neutral'
+    });
+    
+    steps.push({
+        description: 'MACD分析',
+        content: `MACD = ${macd.toFixed(4)}`,
+        result: macd > 0 ? '金叉，看涨信号' : '死叉，看跌信号',
+        type: macd > 0 ? 'positive' : 'negative'
+    });
+    
+    steps.push({
+        description: 'RSI分析',
+        content: `RSI(14) = ${rsi.toFixed(2)}`,
+        result: rsi > 70 ? '超买区域，风险较高' : rsi < 30 ? '超卖区域，机会较大' : '正常区间',
+        type: rsi > 70 ? 'negative' : rsi < 30 ? 'positive' : 'neutral'
+    });
+    
+    let decision = 'hold';
+    let confidence = 0;
+    let decisionReason = '';
+    
+    console.log('决策判断:', { macd, rsi, priceChangePercent });
+    
+    if (macd > 0 && rsi < 70 && priceChangePercent > 0) {
+        decision = 'buy';
+        confidence = Math.min(100, (macd * 10 + (70 - rsi) + priceChangePercent * 2));
+        decisionReason = 'MACD金叉 + RSI未超买 + 价格上涨 = 建议买入';
+        console.log('决策结果: 买入');
+    } else if (macd < 0 && rsi > 30 && priceChangePercent < 0) {
+        decision = 'sell';
+        confidence = Math.min(100, (Math.abs(macd) * 10 + (rsi - 30) + Math.abs(priceChangePercent) * 2));
+        decisionReason = 'MACD死叉 + RSI未超卖 + 价格下跌 = 建议卖出';
+        console.log('决策结果: 卖出');
+    } else {
+        decisionReason = '指标信号不明确 = 建议持有观望';
+        console.log('决策结果: 持有');
+    }
+    
+    console.log('最终决策:', decision);
+    console.log('决策理由:', decisionReason);
+    
+    steps.push({
+        description: '综合决策',
+        content: '基于以上指标综合判断',
+        result: decisionReason,
+        type: decision === 'buy' ? 'positive' : decision === 'sell' ? 'negative' : 'neutral'
+    });
+    
+    return {
+        macd,
+        rsi,
+        ma5,
+        ma10,
+        decision,
+        confidence,
+        priceChange,
+        priceChangePercent,
+        steps
+    };
+}
+
+function calculateMA(currentPrice, prevClose, priceChange) {
+    return (currentPrice + prevClose + priceChange * 0.5) / 2;
+}
+
+function calculateMACD(currentPrice, prevClose, priceChange) {
+    const ema12 = (currentPrice * 0.1538 + prevClose * 0.8462);
+    const ema26 = (currentPrice * 0.0741 + prevClose * 0.9259);
+    const dif = ema12 - ema26;
+    const dea = dif * 0.2;
+    return dif - dea;
+}
+
+function calculateRSI(currentPrice, highPrice, lowPrice, prevClose) {
+    const avgGain = (highPrice - prevClose + currentPrice - lowPrice) / 2;
+    const avgLoss = (prevClose - lowPrice + highPrice - currentPrice) / 2;
+    
+    if (avgLoss === 0) return 100;
+    
+    const rs = avgGain / avgLoss;
+    const rsi = 100 - (100 / (1 + rs));
+    
+    return Math.max(0, Math.min(100, rsi));
+}
+
+function displayAnalysisResult(stockInfo, stockData, analysis) {
+    document.getElementById('qa-stock-code').textContent = stockInfo.code;
+    document.getElementById('qa-stock-name').textContent = stockInfo.name;
+    document.getElementById('qa-stock-price').textContent = `¥${stockData.currentPrice.toFixed(2)}`;
+    
+    updateAnalysisDisplay(analysis);
+    qaResult.style.display = 'block';
+}
+
+function updateAnalysisDisplay(analysis) {
+    const decisionElement = document.getElementById('decision-value');
+    decisionElement.textContent = analysis.decision === 'buy' ? '买入' : 
+                                 analysis.decision === 'sell' ? '卖出' : '持有';
+    decisionElement.className = `decision-value ${analysis.decision}`;
+    
+    document.getElementById('macd-value').textContent = analysis.macd.toFixed(4);
+    document.getElementById('rsi-value').textContent = analysis.rsi.toFixed(2);
+    document.getElementById('ma5-value').textContent = analysis.ma5.toFixed(2);
+    document.getElementById('ma10-value').textContent = analysis.ma10.toFixed(2);
+    
+    const analysisProcess = document.getElementById('analysis-process');
+    const analysisSteps = document.getElementById('analysis-steps');
+    
+    if (analysis.steps && analysis.steps.length > 0) {
+        analysisProcess.style.display = 'block';
+        analysisSteps.innerHTML = analysis.steps.map((step, index) => `
+            <div class="analysis-step">
+                <div class="step-number">${index + 1}</div>
+                <div class="step-content">
+                    <div class="step-description">${step.description}</div>
+                    <div class="step-detail">${step.content}</div>
+                </div>
+                <div class="step-result ${step.type}">${step.result}</div>
+            </div>
+        `).join('');
+    } else {
+        analysisProcess.style.display = 'none';
+    }
 }

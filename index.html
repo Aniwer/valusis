@@ -167,6 +167,65 @@
             <h2>计算过程</h2>
             <div id="calculation-steps"></div>
         </div>
+
+        <div class="quantitative-analysis-section">
+            <h2>量化分析</h2>
+            <div class="stock-info-display">
+                <div class="info-item">
+                    <span class="info-label">股票代码</span>
+                    <span class="info-value" id="qa-stock-code">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">股票名称</span>
+                    <span class="info-value" id="qa-stock-name">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">实时股价</span>
+                    <span class="info-value" id="qa-stock-price">-</span>
+                </div>
+            </div>
+            <div class="model-info">
+                <div class="model-name">
+                    <span class="model-label">量化模型</span>
+                    <span class="model-value">MACD + RSI 综合策略</span>
+                </div>
+                <div class="model-source">
+                    <span class="model-label">模型来源</span>
+                    <span class="model-value">基于技术分析经典指标</span>
+                </div>
+            </div>
+            <button type="button" id="analyze-btn" class="analyze-btn">开始量化分析</button>
+            <div id="qa-loading" class="loading" style="display: none;">正在分析...</div>
+            <div id="qa-result" class="qa-result" style="display: none;">
+                <div class="decision-display">
+                    <span class="decision-label">交易决策</span>
+                    <span class="decision-value" id="decision-value"></span>
+                </div>
+                <div class="analysis-process" id="analysis-process" style="display: none;">
+                    <h3>分析过程</h3>
+                    <div id="analysis-steps"></div>
+                </div>
+                <div class="indicators-display">
+                    <h3>技术指标</h3>
+                    <div class="indicator-item">
+                        <span class="indicator-label">MACD</span>
+                        <span class="indicator-value" id="macd-value"></span>
+                    </div>
+                    <div class="indicator-item">
+                        <span class="indicator-label">RSI(14)</span>
+                        <span class="indicator-value" id="rsi-value"></span>
+                    </div>
+                    <div class="indicator-item">
+                        <span class="indicator-label">MA5</span>
+                        <span class="indicator-value" id="ma5-value"></span>
+                    </div>
+                    <div class="indicator-item">
+                        <span class="indicator-label">MA10</span>
+                        <span class="indicator-value" id="ma10-value"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     <script src="script.js"></script>
 </body>

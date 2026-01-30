@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>股价测试</title>
+</head>
+<body>
+    <h1>股价获取测试</h1>
+    <button onclick="testStockPrice()">测试获取股价</button>
+    <div id="result"></div>
+    <div id="debug"></div>
+
+    <script>
+        function testStockPrice() {
+            const stockCode = '600519';
+            const exchange = 'sh';
+            const script = document.createElement('script');
+            const varName = `v_${exchange}${stockCode}`;
+            
+            document.getElementById('result').innerHTML = '正在获取股价...';
+            document.getElementById('debug').innerHTML = '变量名: ' + varName + '<br>URL: https://qt.gtimg.cn/q=' + exchange + stockCode;
+            
+            const timeout = setTimeout(() => {
+                if (document.body.contains(script)) {
+                    document.body.removeChild(script);
+                    document.getElementById('result').innerHTML = '获取股价超时';
+                    document.getElementById('debug').innerHTML += '<br>超时错误';
+                }
+            }, 5000);
+            
+            script.onload = function() {
+                clearTimeout(timeout);
+                document.body.removeChild(script);
+                
+                document.getElementById('debug').innerHTML += '<br>script loaded';
+                
+                try {
+                    const stockData = window[varName];
+                    document.getElementById('debug').innerHTML += '<br>stockData: ' + JSON.stringify(stockData);
+                    document.getElementById('debug').innerHTML += '<br>stockData type: ' + typeof stockData;
+                    
+                    if (stockData && Array.isArray(stockData)) {
+                        document.getElementById('debug').innerHTML += '<br>stockData length: ' + stockData.length;
+                        document.getElementById('debug').innerHTML += '<br>stockData[3]: ' + stockData[3];
+                        
+                        const currentPrice = parseFloat(stockData[3]);
+                        document.getElementById('result').innerHTML = '当前股价: ' + currentPrice;
+                    } else {
+                        document.getElementById('result').innerHTML = '数据格式错误';
+                    }
+                } catch (error) {
+                    document.getElementById('result').innerHTML = '解析失败: ' + error.message;
+                    document.getElementById('debug').innerHTML += '<br>Error: ' + error.message;
+                }
+            };
+            
+            script.onerror = function() {
+                clearTimeout(timeout);
+                if (document.body.contains(script)) {
+                    document.body.removeChild(script);
+                }
+                document.getElementById('result').innerHTML = '加载失败';
+                document.getElementById('debug').innerHTML += '<br>script error';
+            };
+            
+            script.src = `https://qt.gtimg.cn/q=${exchange}${stockCode}`;
+            document.body.appendChild(script);
+        }
+    </script>
+</body>
+</html>
